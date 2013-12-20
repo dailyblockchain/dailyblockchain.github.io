@@ -69,8 +69,7 @@
     
     var isWebgl = graphics.isSupported();
     if (!isWebgl) {
-        alert("Turn on webgl or use modern browser")
-        return;
+        alert("Turn on webgl or use modern browser");
     }
     
     var graph = Viva.Graph.graph(),
@@ -145,23 +144,30 @@
                 // node which is both input and output
                 label = "input/output";
             }
+            
+            // for addresses infor cors not enabled :-( 
+            // enabled for blocks
+            
+            var balance = 0;
+            //lets get balance
             $.ajax({
-                url:"http://blockchain.info/address/"+id+"?format=json&limit=1&cors=true",
+                //url:"http://blockchain.info/address/"+id+"?format=json&limit=1&cors=true",
+                //url:"http://blockchain.info/rawblock/123?cors=true&format=json",
+                url:"https://blockchain.info/q/addressbalance/"+id+"?cors=true",
                 async:false,
                 crossDomain:true,
-                dataType:"json",
-                success:function(json){
-                    console.log(json)
+                dataType:"text",
+                success:function(text){
+                    balance = text/100000000;
                 }
             });
-
+            
+            document.getElementById("info").innerHTML = label+"<br/>"+id+"<br/>balance: "+balance +" BTC";
 
         }else{
             // transaction node
+            document.getElementById("info").innerHTML = label+"<br/>"+id;
         }
-        document.getElementById("info").innerHTML = label+"<br/>"+id;
-        console.log(node);
-        
     };
 
     // need to get these 2 from yavis.reddit.min.js
@@ -234,8 +240,8 @@ var events = Viva.Graph.webglInputEvents(graphics, graph),
     // pause rendere on spacebar
     var paused = false;
     $(window).keydown(function(e) {
-        e.preventDefault();
         if (e.keyCode === 32) { // toggle on spacebar; 
+            e.preventDefault();
             paused = !paused;
             if (paused) { renderer.pause(); } 
             else { renderer.resume(); } 
