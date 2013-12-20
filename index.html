@@ -11,6 +11,7 @@
     body{
         margin: 0;
         padding: 0;
+        position: relative;
     }
     .input-node{color:green;}
     .output-node{color:red;}
@@ -18,10 +19,20 @@
     .transaction-node{color:blue;}
 
     #output{display:none;}
+
+    #info{
+        position: absolute;
+        right:4px;
+        top:4px;
+        width:300px;
+        background-color: #ccc;
+        padding:4px;
+    }
     </style>
 </head>
 <body>
 	<div id="g" style="background-color:black; width:100%; height:600px;"></div> 
+    <div id="info">Addred/Transaction details (hover over nodes)</div>
     <p>About: Visualization of bitcoin transactions (unconfirmed ones).</p>
     <span>Node size scale: </span>
     <label>LINEAR</label>
@@ -117,6 +128,40 @@
             // linear scaling from min.max -> rmin rmax
             return rmin + (rmax - rmin) * ( (val - min)/(max - min) ) ;
         }
+    },
+    getNodeDetails = function(node){
+        // 
+        // http://blockchain.info/rawtx/$tx_index?format=json
+        var label = "transaction";
+        var id = node.id;
+        if(node.data && node.data.t){
+            if(node.data.t == "i"){
+                // input node
+                label = "input";
+            }else if(node.data.t == "o"){
+                // output node
+                label = "output";
+            }else if(node.data.t == "mix"){
+                // node which is both input and output
+                label = "input/output";
+            }
+            $.ajax({
+                url:"http://blockchain.info/address/"+id+"?format=json&limit=1&cors=true",
+                async:false,
+                crossDomain:true,
+                dataType:"json",
+                success:function(json){
+                    console.log(json)
+                }
+            });
+
+
+        }else{
+            // transaction node
+        }
+        document.getElementById("info").innerHTML = label+"<br/>"+id;
+        console.log(node);
+        
     };
 
     // need to get these 2 from yavis.reddit.min.js
@@ -164,9 +209,9 @@ var events = Viva.Graph.webglInputEvents(graphics, graph),
     };
                  
     events.mouseEnter(function(node){
-        // here fetch cluster details 
-        //getClusterDetails(node);
-        console.log(node);
+        
+	    getNodeDetails(node);
+
         colorLinks(lastHovered);
         lastHovered = node;
      
@@ -189,10 +234,12 @@ var events = Viva.Graph.webglInputEvents(graphics, graph),
     // pause rendere on spacebar
     var paused = false;
     $(window).keydown(function(e) {
+        e.preventDefault();
         if (e.keyCode === 32) { // toggle on spacebar; 
             paused = !paused;
             if (paused) { renderer.pause(); } 
             else { renderer.resume(); } 
+
         }
     });
 
