@@ -259,8 +259,10 @@ var events = Viva.Graph.webglInputEvents(graphics, graph),
 
 
     var linksBuffer = [];
-    //var wsUri = "ws://ws.blockchain.info/inv"; 
-    var wsUri = "//ws.blockchain.info/inv"; 
+    var wsUri = "ws://ws.blockchain.info/inv"; 
+    if (document.location.protocol.indexOf("https") === 0) {
+      wsUri = "wss://ws.blockchain.info/inv"; 
+    }
     var output;  
      
      function init() { 
