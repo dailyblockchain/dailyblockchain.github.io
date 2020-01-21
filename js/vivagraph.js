@@ -5807,9 +5807,15 @@ Viva.Graph.View.webglGraphics = function (options) {
 
         updateSize = function () {
             if (container && graphicsRoot) {
-                width = graphicsRoot.width = Math.max(container.offsetWidth, 1);
-                height = graphicsRoot.height = Math.max(container.offsetHeight, 1);
-                if (gl) { gl.viewport(0, 0, width, height); }
+                const dpr = window.devicePixelRatio || 1;
+                width = graphicsRoot.width = Math.max(container.offsetWidth * dpr, 1);
+                height = graphicsRoot.height = Math.max(container.offsetHeight * dpr, 1);
+                if (gl) {
+                    gl.viewport(0, 0, width, height);
+                    gl.canvas.style = "width: 100%";
+                    gl.canvas.width = width;
+                    gl.canvas.height = height;
+                }
                 if (linkProgram) { linkProgram.updateSize(width / 2, height / 2); }
                 if (nodeProgram) { nodeProgram.updateSize(width / 2, height / 2); }
             }
@@ -6020,12 +6026,12 @@ Viva.Graph.View.webglGraphics = function (options) {
             container = c;
 
             graphicsRoot = window.document.createElement("canvas");
+            gl = graphicsRoot.getContext("experimental-webgl", contextParameters);
             updateSize();
             resetScaleInternal();
             container.appendChild(graphicsRoot);
 
 
-            gl = graphicsRoot.getContext("experimental-webgl", contextParameters);
             if (!gl) {
                 var msg = "Could not initialize WebGL. Seems like the browser doesn't support it.";
                 window.alert(msg);
